@@ -27,6 +27,10 @@
             if (Array.isArray(W.practiceExam)) {
                 W.practiceExam.forEach(d => { this.days[d.day] = d; });
             }
+            // Load catch-up module as Day 44
+            if (Array.isArray(W.day44_catchup)) {
+                W.day44_catchup.forEach(d => { this.days[d.day] = d; });
+            }
         },
         getDay(n) { return this.days[n] || null; },
         getWeekDays(weekId) {
@@ -99,7 +103,7 @@
 
             if (hash.startsWith('#/day/')) {
                 const dayNum = parseInt(hash.split('/')[2]);
-                if (dayNum >= 1 && dayNum <= 43) {
+                if (dayNum >= 1 && dayNum <= 44) {
                     renderDayView(dayNum);
                     Sidebar.setActive(dayNum);
                     return;
@@ -279,6 +283,29 @@
             html += '</div></div></section>';
         }
 
+        // Exam Cram / Catch-Up Card
+        const catchup = Data.getDay(44);
+        if (catchup) {
+            const catchupScore = Progress.getScore(44);
+            const catchupDone = Progress.isComplete(44);
+            html += '<section class="practice-exam-section animate-in animate-in-delay-3" style="margin-top: 24px;">';
+            html += '<div class="practice-exam-card catchup-card" onclick="location.hash=\'#/day/44\'">';
+            html += '<div class="pe-card-glow" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(14,165,233,0.15));"></div>';
+            html += '<div class="pe-card-content">';
+            html += '<div class="pe-badge" style="background: linear-gradient(135deg, #10b981, #0ea5e9);">⚡ BONUS MODULE</div>';
+            html += '<h2 style="background: linear-gradient(135deg, #10b981, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">COF-C03 Final Catch-Up</h2>';
+            html += '<p>Master the latest advanced features: SPCS, Dynamic Tables, Iceberg, Governance & more.</p>';
+            html += '<div class="pe-stats">';
+            html += '<span class="pe-stat"><strong>7</strong> Key Topics</span>';
+            html += '<span class="pe-stat"><strong>14</strong> Quiz Qs</span>';
+            html += '</div>';
+            if (catchupDone && catchupScore !== null) {
+                html += '<div class="pe-result">Score: <strong>' + catchupScore + '%</strong></div>';
+            }
+            html += '<button class="btn btn-primary">' + (catchupDone ? 'Review Content →' : 'Start Module →') + '</button>';
+            html += '</div></div></section>';
+        }
+
         html += '</div>';
         main.innerHTML = html;
     }
@@ -305,8 +332,10 @@
         html += '</div>';
         if (dayNum <= 42) {
             html += '<p class="day-label">Day ' + dayNum + ' of 42 • Week ' + weekIdx + '</p>';
-        } else {
+        } else if (dayNum === 43) {
             html += '<p class="day-label">Practice Exam • Bonus Content</p>';
+        } else {
+            html += '<p class="day-label">Final Catch-Up • Bonus Content</p>';
         }
         html += '<h1>' + day.title + '</h1>';
         html += '</div>';
@@ -345,7 +374,11 @@
                 html += '<button class="btn btn-sm btn-secondary" id="timer-toggle-btn" onclick="window.__toggleTimer()">Start Timer</button>';
                 html += '</div>';
             }
-            html += '<div class="quiz-header"><h2>🧠 ' + (dayNum === 43 ? 'Practice Exam' : 'Quiz') + '</h2>';
+            }
+            let quizTitle = 'Quiz';
+            if (dayNum === 43) quizTitle = 'Practice Exam';
+            if (dayNum === 44) quizTitle = 'Module Quiz';
+            html += '<div class="quiz-header"><h2>🧠 ' + quizTitle + '</h2>';
             html += '<span class="quiz-counter" id="quiz-counter">Question 1 of ' + day.quiz.length + '</span></div>';
             html += '<div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress" style="width:' + (100 / day.quiz.length) + '%"></div></div>';
             html += '<div id="quiz-container"></div>';
@@ -356,7 +389,7 @@
         html += '<div class="day-nav">';
         if (dayNum > 1 && dayNum <= 42) {
             html += '<button class="day-nav-btn prev" onclick="location.hash=\'#/day/' + (dayNum - 1) + '\'">← Day ' + (dayNum - 1) + '</button>';
-        } else if (dayNum === 43) {
+        } else if (dayNum === 43 || dayNum === 44) {
             html += '<button class="day-nav-btn prev" onclick="location.hash=\'#/\'">← Dashboard</button>';
         } else {
             html += '<span></span>';

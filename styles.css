@@ -390,6 +390,7 @@ hr{border:none;height:1px;background:var(--border);margin:2rem 0}
 .practice-exam-section{margin-top:32px}
 .practice-exam-card{position:relative;border-radius:16px;padding:3px;background:linear-gradient(135deg,#ff6b6b,#ffa726,#29b5f6,#7c4dff);cursor:pointer;transition:transform .3s,box-shadow .3s;overflow:hidden}
 .practice-exam-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(255,107,107,.25)}
+.catchup-card:hover{box-shadow:0 12px 40px rgba(16,185,129,.25)}
 .pe-card-glow{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,107,.15),rgba(124,77,255,.15));opacity:0;transition:opacity .3s}
 .practice-exam-card:hover .pe-card-glow{opacity:1}
 .pe-card-content{position:relative;background:var(--bg-secondary);border-radius:14px;padding:32px;text-align:center}
