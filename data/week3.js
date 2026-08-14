@@ -244,7 +244,8 @@ REVOKE SELECT ON TABLE sales_db.public.daily_sales FROM ROLE data_analyst;</code
         objectives: [
             "Identify the five predefined system roles in Snowflake",
             "Understand the responsibilities and privileges of each system role",
-            "Learn best practices for structuring role hierarchies"
+            "Learn best practices for structuring role hierarchies",
+            "Understand how to use secondary roles to simplify access management"
         ],
         sections: [
             {
@@ -329,6 +330,24 @@ REVOKE SELECT ON TABLE sales_db.public.daily_sales FROM ROLE data_analyst;</code
                     <li><strong>Avoid using ACCOUNTADMIN for everyday work:</strong> Because ACCOUNTADMIN has unlimited power (including dropping entire databases and viewing billing), logging in as ACCOUNTADMIN for basic querying is a massive security risk.</li>
                     <li><strong>Align Custom Roles to SYSADMIN:</strong> When you create custom roles (e.g., <code>MARKETING_ANALYST</code>), you should grant that custom role to SYSADMIN. Why? Because if a custom role creates a table and owns it, you want your central IT/DBA team (acting as SYSADMIN) to have inherited privileges to manage or drop that table if the original user leaves the company.</li>
                 </ul>`
+            },
+            {
+                title: "Secondary Roles",
+                content: `<p>A <strong>secondary role</strong> allows a user to use privileges from roles OTHER than their active primary role in a session. Without secondary roles, a user can only access objects through their current active role.</p>
+                <p>With secondary roles, users get combined privileges from multiple roles they have been granted, without having to switch contexts.</p>
+                <ul>
+                    <li><code>USE SECONDARY ROLES ALL</code> — activates ALL roles granted to the user (in addition to their primary role).</li>
+                    <li><code>USE SECONDARY ROLES NONE</code> — disables secondary roles (this is the default behavior).</li>
+                </ul>
+                <p>You can also use the <code>DEFAULT_SECONDARY_ROLES</code> user-level property to set the default secondary roles behavior for a user automatically upon login.</p>
+                <div class="callout tip">
+                    <div class="callout-title">💡 Key Takeaway</div>
+                    <p>Think of your primary role as your main office key. Secondary roles are like getting copies of all other keys you're authorized to carry — you can open more doors without going back to the key cabinet each time.</p>
+                </div>
+                <div class="callout exam-tip">
+                    <div class="callout-title">📝 Exam Tip</div>
+                    <p>The COF-C03 exam may test whether you know that <code>USE SECONDARY ROLES ALL</code> grants privileges from <em>ALL</em> roles assigned to the user, not just the roles in the hierarchy above or below the primary role.</p>
+                </div>`
             }
         ],
         quiz: [
@@ -435,6 +454,45 @@ REVOKE SELECT ON TABLE sales_db.public.daily_sales FROM ROLE data_analyst;</code
                 ],
                 correct: 2,
                 explanation: "None of the five system-defined roles (ACCOUNTADMIN, SECURITYADMIN, SYSADMIN, USERADMIN, PUBLIC) can be dropped."
+            },
+            {
+                id: "d16q9",
+                type: "single",
+                question: "What does the command USE SECONDARY ROLES ALL accomplish in a Snowflake session?",
+                options: [
+                    "It activates all roles that are in the hierarchy above the user's primary role.",
+                    "It activates all roles granted to the user, allowing them to use combined privileges without switching their primary role.",
+                    "It grants the user temporary access to the SYSADMIN role.",
+                    "It shares the user's primary role with other users in the same session."
+                ],
+                correct: 1,
+                explanation: "USE SECONDARY ROLES ALL activates all roles granted to the user, not just roles in the hierarchy, giving them the combined privileges of all their authorized roles."
+            },
+            {
+                id: "d16q10",
+                type: "single",
+                question: "Which of the following is the default behavior for secondary roles in a Snowflake session?",
+                options: [
+                    "USE SECONDARY ROLES ALL",
+                    "USE SECONDARY ROLES NONE",
+                    "USE SECONDARY ROLES PRIMARY",
+                    "USE SECONDARY ROLES HIERARCHY"
+                ],
+                correct: 1,
+                explanation: "By default, secondary roles are disabled in a session (USE SECONDARY ROLES NONE), meaning the user only has the privileges of their active primary role."
+            },
+            {
+                id: "d16q11",
+                type: "single",
+                question: "How can an administrator configure a user to automatically have all their granted roles active as secondary roles every time they log in?",
+                options: [
+                    "By granting the MANAGE GRANTS privilege to the user.",
+                    "By setting the DEFAULT_SECONDARY_ROLES property to 'ALL' on the user.",
+                    "By adding the user to the ACCOUNTADMIN role.",
+                    "By configuring a Network Policy for the user."
+                ],
+                correct: 1,
+                explanation: "The DEFAULT_SECONDARY_ROLES user-level property can be set to 'ALL' so that the user automatically has all their granted roles active as secondary roles upon login."
             }
         ]
     },
@@ -989,7 +1047,8 @@ GRANT SELECT ON FUTURE TABLES IN SCHEMA sales_db.public TO ROLE data_analyst;</c
         objectives: [
             "Understand Dynamic Data Masking and Row Access Policies",
             "Learn how Object Tagging and Data Classification aid in governance",
-            "Understand Data Lineage and Access History features"
+            "Understand Data Lineage and Access History features",
+            "Learn how to use Trust Center and ACCOUNT_USAGE for security monitoring"
         ],
         sections: [
             {
@@ -1062,6 +1121,37 @@ ALTER TABLE employees MODIFY COLUMN ssn SET MASKING POLICY ssn_mask;</code></pre
                         <path d="M 400 150 L 400 145" stroke="#6b7b8d" stroke-width="2"/>
                     </svg>
                     <p class="diagram-caption">Figure 5: The Snowflake Data Governance Lifecycle.</p>
+                </div>`
+            },
+            {
+                title: "Trust Center & Account Monitoring",
+                content: `<p><strong>Trust Center</strong></p>
+                <ul>
+                    <li>What it is: a centralized security monitoring dashboard in Snowsight</li>
+                    <li>Purpose: proactively identify and reduce security risks in your Snowflake account</li>
+                    <li>Scans for issues like: users without MFA, overly permissive network policies, unused privileges</li>
+                    <li>Required roles: <code>SNOWFLAKE.TRUST_CENTER_VIEWER</code> (read-only), <code>SNOWFLAKE.TRUST_CENTER_ADMIN</code> (configure scanners)</li>
+                    <li>Available in Enterprise edition and above</li>
+                </ul>
+                <p><strong>ACCOUNT_USAGE Schema</strong></p>
+                <ul>
+                    <li>Located in the shared SNOWFLAKE database: <code>SNOWFLAKE.ACCOUNT_USAGE</code></li>
+                    <li>Only ACCOUNTADMIN can access ACCOUNT_USAGE by default</li>
+                    <li>Key views tested on the exam:
+                        <ul>
+                            <li><code>QUERY_HISTORY</code>: all queries run in the account (up to 1 year)</li>
+                            <li><code>LOGIN_HISTORY</code>: all login attempts</li>
+                            <li><code>WAREHOUSE_METERING_HISTORY</code>: credit usage per warehouse</li>
+                            <li><code>STORAGE_USAGE</code>: storage consumption over time</li>
+                            <li><code>ACCESS_HISTORY</code>: tracks which columns/objects were accessed</li>
+                            <li><code>TASK_HISTORY</code>: task execution history</li>
+                        </ul>
+                    </li>
+                    <li>Difference from INFORMATION_SCHEMA: ACCOUNT_USAGE has longer retention (1 year vs 14 days) but has latency (up to 45 min delay)</li>
+                </ul>
+                <div class="callout exam-tip">
+                    <div class="callout-title">📝 Exam Tip</div>
+                    <p>Don't confuse ACCOUNT_USAGE (up to 1 year retention, 45-min latency, in SNOWFLAKE database) with INFORMATION_SCHEMA (real-time, shorter retention, per-database).</p>
                 </div>`
             }
         ],
@@ -1154,6 +1244,45 @@ ALTER TABLE employees MODIFY COLUMN ssn SET MASKING POLICY ssn_mask;</code></pre
                 ],
                 correct: 0,
                 explanation: "Yes. You can apply a Row Access Policy to a table to filter rows, and simultaneously apply Masking Policies to specific columns within that table to hide data in the remaining rows."
+            },
+            {
+                id: "d20q8",
+                type: "single",
+                question: "What is the primary purpose of the Trust Center in Snowsight?",
+                options: [
+                    "To manage billing and credit card information securely.",
+                    "To proactively identify and reduce security risks such as users without MFA or overly permissive network policies.",
+                    "To generate encryption keys for Tri-Secret Secure.",
+                    "To automatically mask PII data based on regulatory compliance standards."
+                ],
+                correct: 1,
+                explanation: "The Trust Center is a centralized security monitoring dashboard that scans your account for security risks (like missing MFA) and recommends actions to improve your security posture."
+            },
+            {
+                id: "d20q9",
+                type: "single",
+                question: "Which of the following is a key difference between the ACCOUNT_USAGE schema and the INFORMATION_SCHEMA?",
+                options: [
+                    "ACCOUNT_USAGE is per-database, while INFORMATION_SCHEMA is account-wide.",
+                    "ACCOUNT_USAGE provides real-time data, while INFORMATION_SCHEMA has latency.",
+                    "ACCOUNT_USAGE retains data for up to 1 year but has latency, while INFORMATION_SCHEMA is real-time but retains data for a shorter period (14 days to 6 months depending on the view).",
+                    "ACCOUNT_USAGE is available to all users, while INFORMATION_SCHEMA is only for ACCOUNTADMIN."
+                ],
+                correct: 2,
+                explanation: "ACCOUNT_USAGE views store up to 1 year of historical data but can have a latency of up to 45 minutes (sometimes 1-2 hours for certain views). INFORMATION_SCHEMA views are real-time but only store data for up to 14 days (or up to 6 months for some specific views)."
+            },
+            {
+                id: "d20q10",
+                type: "single",
+                question: "By default, which role is required to access the views in the SNOWFLAKE.ACCOUNT_USAGE schema?",
+                options: [
+                    "SYSADMIN",
+                    "SECURITYADMIN",
+                    "ACCOUNTADMIN",
+                    "PUBLIC"
+                ],
+                correct: 2,
+                explanation: "By default, only the ACCOUNTADMIN role has access to the shared SNOWFLAKE database and the ACCOUNT_USAGE schema within it, though privileges can be granted to other roles."
             }
         ]
     },

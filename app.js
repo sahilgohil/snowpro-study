@@ -23,6 +23,10 @@
                 const week = W['week' + i];
                 if (Array.isArray(week)) week.forEach(d => { this.days[d.day] = d; });
             }
+            // Load practice exam as Day 43
+            if (Array.isArray(W.practiceExam)) {
+                W.practiceExam.forEach(d => { this.days[d.day] = d; });
+            }
         },
         getDay(n) { return this.days[n] || null; },
         getWeekDays(weekId) {
@@ -95,7 +99,7 @@
 
             if (hash.startsWith('#/day/')) {
                 const dayNum = parseInt(hash.split('/')[2]);
-                if (dayNum >= 1 && dayNum <= 42) {
+                if (dayNum >= 1 && dayNum <= 43) {
                     renderDayView(dayNum);
                     Sidebar.setActive(dayNum);
                     return;
@@ -249,7 +253,33 @@
             });
             html += '</div></div>';
         });
-        html += '</div></section></div>';
+        html += '</div></section>';
+
+        // Practice Exam Card
+        const pe = Data.getDay(43);
+        if (pe) {
+            const peScore = Progress.getScore(43);
+            const peDone = Progress.isComplete(43);
+            html += '<section class="practice-exam-section animate-in animate-in-delay-2">';
+            html += '<div class="practice-exam-card" onclick="location.hash=\'#/day/43\'">';
+            html += '<div class="pe-card-glow"></div>';
+            html += '<div class="pe-card-content">';
+            html += '<div class="pe-badge">🏆 FULL PRACTICE EXAM</div>';
+            html += '<h2>100-Question Practice Test</h2>';
+            html += '<p>Simulated COF-C03 exam at real difficulty level • 115-minute timer • All 5 domains</p>';
+            html += '<div class="pe-stats">';
+            html += '<span class="pe-stat"><strong>100</strong> Questions</span>';
+            html += '<span class="pe-stat"><strong>115</strong> Minutes</span>';
+            html += '<span class="pe-stat"><strong>5</strong> Domains</span>';
+            html += '</div>';
+            if (peDone && peScore !== null) {
+                html += '<div class="pe-result">Last Score: <strong>' + peScore + '%</strong>' + (peScore >= 75 ? ' ✅ Exam Ready!' : ' — Keep studying!') + '</div>';
+            }
+            html += '<button class="btn btn-primary">' + (peDone ? 'Retake Exam →' : 'Start Exam →') + '</button>';
+            html += '</div></div></section>';
+        }
+
+        html += '</div>';
         main.innerHTML = html;
     }
 
@@ -273,7 +303,11 @@
         html += '<span class="domain-badge" style="background:' + (day.domain ? day.domain.color : week.color) + '18;color:' + (day.domain ? day.domain.color : week.color) + '">' + (day.domain ? day.domain.name : week.domain) + '</span>';
         html += '<span class="time-badge">⏱ ' + (day.estimatedTime || '60 min') + '</span>';
         html += '</div>';
-        html += '<p class="day-label">Day ' + dayNum + ' of 42 • Week ' + weekIdx + '</p>';
+        if (dayNum <= 42) {
+            html += '<p class="day-label">Day ' + dayNum + ' of 42 • Week ' + weekIdx + '</p>';
+        } else {
+            html += '<p class="day-label">Practice Exam • Bonus Content</p>';
+        }
         html += '<h1>' + day.title + '</h1>';
         html += '</div>';
 
@@ -303,7 +337,15 @@
         // Quiz section
         if (day.quiz && day.quiz.length) {
             html += '<div class="quiz-section animate-in">';
-            html += '<div class="quiz-header"><h2>🧠 Quiz</h2>';
+            // Add exam timer for practice exam (Day 43)
+            if (dayNum === 43) {
+                html += '<div class="exam-timer-bar" id="exam-timer-bar">';
+                html += '<span class="timer-icon">⏱</span>';
+                html += '<span class="timer-display" id="exam-timer">115:00</span>';
+                html += '<button class="btn btn-sm btn-secondary" id="timer-toggle-btn" onclick="window.__toggleTimer()">Start Timer</button>';
+                html += '</div>';
+            }
+            html += '<div class="quiz-header"><h2>🧠 ' + (dayNum === 43 ? 'Practice Exam' : 'Quiz') + '</h2>';
             html += '<span class="quiz-counter" id="quiz-counter">Question 1 of ' + day.quiz.length + '</span></div>';
             html += '<div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress" style="width:' + (100 / day.quiz.length) + '%"></div></div>';
             html += '<div id="quiz-container"></div>';
@@ -312,13 +354,17 @@
 
         // Day navigation
         html += '<div class="day-nav">';
-        if (dayNum > 1) {
+        if (dayNum > 1 && dayNum <= 42) {
             html += '<button class="day-nav-btn prev" onclick="location.hash=\'#/day/' + (dayNum - 1) + '\'">← Day ' + (dayNum - 1) + '</button>';
+        } else if (dayNum === 43) {
+            html += '<button class="day-nav-btn prev" onclick="location.hash=\'#/\'">← Dashboard</button>';
         } else {
             html += '<span></span>';
         }
         if (dayNum < 42) {
             html += '<button class="day-nav-btn next" onclick="location.hash=\'#/day/' + (dayNum + 1) + '\'">Day ' + (dayNum + 1) + ' →</button>';
+        } else if (dayNum === 42) {
+            html += '<button class="day-nav-btn next" onclick="location.hash=\'#/day/43\'">Practice Exam →</button>';
         } else {
             html += '<span></span>';
         }
@@ -520,6 +566,68 @@
     window.__retryQuiz = function () {
         const day = Data.getDay(Quiz.dayNum);
         if (day && day.quiz) Quiz.init(Quiz.dayNum, day.quiz);
+    };
+
+    /* ---- Exam Timer (Practice Exam) ---- */
+    const ExamTimer = {
+        seconds: 115 * 60,
+        interval: null,
+        running: false,
+        start() {
+            if (this.interval) return;
+            this.running = true;
+            const btn = document.getElementById('timer-toggle-btn');
+            if (btn) btn.textContent = 'Pause Timer';
+            this.interval = setInterval(() => {
+                this.seconds--;
+                this.updateDisplay();
+                if (this.seconds <= 0) {
+                    this.stop();
+                    const bar = document.getElementById('exam-timer-bar');
+                    if (bar) bar.classList.add('expired');
+                    const display = document.getElementById('exam-timer');
+                    if (display) display.textContent = 'TIME UP!';
+                }
+            }, 1000);
+        },
+        pause() {
+            clearInterval(this.interval);
+            this.interval = null;
+            this.running = false;
+            const btn = document.getElementById('timer-toggle-btn');
+            if (btn) btn.textContent = 'Resume Timer';
+        },
+        stop() {
+            clearInterval(this.interval);
+            this.interval = null;
+            this.running = false;
+        },
+        updateDisplay() {
+            const display = document.getElementById('exam-timer');
+            if (!display) return;
+            const min = Math.floor(this.seconds / 60);
+            const sec = this.seconds % 60;
+            display.textContent = min + ':' + (sec < 10 ? '0' : '') + sec;
+            // Color warning at 10 min
+            if (this.seconds <= 600) {
+                display.style.color = '#ff6b6b';
+                const bar = document.getElementById('exam-timer-bar');
+                if (bar) bar.classList.add('warning');
+            }
+        },
+        reset() {
+            this.stop();
+            this.seconds = 115 * 60;
+            this.updateDisplay();
+        }
+    };
+
+    window.__toggleTimer = function () {
+        if (ExamTimer.running) {
+            ExamTimer.pause();
+        } else {
+            ExamTimer.start();
+        }
     };
 
     /* ---- Theme Manager ---- */

@@ -407,7 +407,8 @@ window.SNOWPRO.week2 = [
         objectives: [
             "Understand Snowflake Cortex AI and its capabilities (LLM and ML functions)",
             "Learn about Snowpark and its use cases for non-SQL developers",
-            "Understand how both features push compute down to Snowflake data"
+            "Understand how both features push compute down to Snowflake data",
+            "Understand the roles of Cortex Search and Cortex Analyst within the Cortex AI suite"
         ],
         sections: [
             {
@@ -496,6 +497,17 @@ window.SNOWPRO.week2 = [
     <div class="callout-title">⚠️ Common Misconception</div>
     <p>Snowpark is <strong>not</strong> an external compute cluster (like Databricks). It is a set of libraries that allow your Python/Java code to run <strong>inside</strong> Snowflake's existing Virtual Warehouses.</p>
 </div>`
+            },
+            {
+                title: "Cortex Search & Cortex Analyst",
+                content: `<p><strong>Cortex Search</strong> is a fully managed search service for semantic search over unstructured/text data. It is commonly used for building search applications and RAG (Retrieval Augmented Generation) pipelines. You create a Cortex Search Service on a table column, and then query it with natural language. Snowflake handles all the vector embeddings and infrastructure automatically. A key benefit is that it combines structured filters with semantic relevance.</p>
+
+<p><strong>Cortex Analyst</strong> is a natural-language-to-SQL feature designed for business users. It allows non-technical users to ask questions about data in plain English. You define a semantic model (in YAML), and then users can query via REST API or Streamlit. Cortex Analyst outputs structured SQL results from natural language questions, and like other Cortex features, it runs entirely inside Snowflake so the data never leaves the platform.</p>
+
+<div class="callout exam-tip">
+    <div class="callout-title">📝 Exam Tip</div>
+    <p>The exam tests conceptual understanding of Cortex features — know WHAT each does and WHEN to use it, not the exact API syntax.</p>
+</div>`
             }
         ],
         quiz: [
@@ -574,6 +586,35 @@ window.SNOWPRO.week2 = [
                 ],
                 correct: 1,
                 explanation: "Pushdown means the computational logic (written in Python/Scala) is pushed down to the Snowflake database engine, rather than pulling the data to the client."
+            },
+            {
+                id: "d10q8",
+                type: "single",
+                question: "Which Snowflake feature provides a fully managed semantic search service over unstructured text, suitable for RAG pipelines without managing vector infrastructure?",
+                options: ["Cortex Search", "Cortex Analyst", "Snowpark", "Dynamic Tables"],
+                correct: 0,
+                explanation: "Cortex Search is a fully managed search service for semantic search over unstructured/text data, commonly used for RAG pipelines. It handles vector embeddings and infrastructure automatically."
+            },
+            {
+                id: "d10q9",
+                type: "single",
+                question: "A company wants to allow its non-technical business users to ask questions about sales data in plain English and receive structured results. Which feature enables this natural-language-to-SQL capability?",
+                options: ["Cortex Complete", "Cortex Search", "Cortex Analyst", "Snowflake Notebooks"],
+                correct: 2,
+                explanation: "Cortex Analyst is a natural-language-to-SQL feature that uses a semantic model to allow business users to ask questions in plain English."
+            },
+            {
+                id: "d10q10",
+                type: "single",
+                question: "When studying Snowflake Cortex features for the COF-C03 exam, what level of knowledge is typically expected?",
+                options: [
+                    "Writing complex API syntax to train custom neural networks.",
+                    "Knowing the exact API syntax for every Cortex function.",
+                    "Conceptual understanding of what each feature does and when to use it.",
+                    "Managing the underlying vector database infrastructure manually."
+                ],
+                correct: 2,
+                explanation: "The exam primarily tests conceptual understanding of Cortex features—knowing what each does and the appropriate use cases, rather than exact API syntax or underlying infrastructure management."
             }
         ]
     },

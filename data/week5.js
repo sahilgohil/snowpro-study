@@ -222,7 +222,8 @@ window.SNOWPRO.week5 = [
             "Understand the VARIANT data type",
             "Query semi-structured data using dot notation",
             "Use the FLATTEN function",
-            "Construct and convert semi-structured data"
+            "Construct and convert semi-structured data",
+            "Use Window Functions to perform calculations across related rows"
         ],
         sections: [
             {
@@ -285,6 +286,42 @@ LATERAL FLATTEN(input => t.src:items) f;</code></pre>
                         <li><strong>PARSE_JSON:</strong> Parses a JSON string into a VARIANT value.</li>
                         <li><strong>TO_JSON:</strong> Converts a VARIANT value to a JSON string.</li>
                     </ul>
+                `
+            },
+            {
+                title: "Window Functions",
+                content: `
+                    <p><strong>Window functions</strong> perform calculations across a set of rows related to the current row WITHOUT collapsing them (unlike <code>GROUP BY</code>).</p>
+                    <p><strong>Syntax:</strong> <code>function() OVER (PARTITION BY col ORDER BY col ROWS/RANGE ...)</code></p>
+                    <h4>Key Functions on the Exam</h4>
+                    <ul>
+                        <li><code>ROW_NUMBER()</code>: Assigns a unique sequential number, no ties.</li>
+                        <li><code>RANK()</code>: Assigns rank with gaps for ties (1, 2, 2, 4).</li>
+                        <li><code>DENSE_RANK()</code>: Assigns rank without gaps (1, 2, 2, 3).</li>
+                        <li><code>LEAD(col, offset)</code>: Access value from the NEXT row.</li>
+                        <li><code>LAG(col, offset)</code>: Access value from the PREVIOUS row.</li>
+                        <li><code>NTILE(n)</code>: Distributes rows into <em>n</em> roughly equal buckets.</li>
+                        <li><code>SUM() OVER()</code>, <code>AVG() OVER()</code>: Running or cumulative aggregates.</li>
+                    </ul>
+                    <div class="comparison-table">
+                        <table>
+                            <tr><th>Function</th><th>Behavior on Ties</th><th>Result for 100, 100, 90</th></tr>
+                            <tr><td><code>ROW_NUMBER()</code></td><td>Always unique</td><td>1, 2, 3</td></tr>
+                            <tr><td><code>RANK()</code></td><td>Ties get same rank, next gets gap</td><td>1, 1, 3</td></tr>
+                            <tr><td><code>DENSE_RANK()</code></td><td>Ties get same rank, no gap</td><td>1, 1, 2</td></tr>
+                        </table>
+                    </div>
+                    <h4>Frame Clauses and Use Cases</h4>
+                    <p>A frame clause like <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> is used to calculate running totals.</p>
+                    <ul>
+                        <li><strong>Finding top-N per group:</strong> Use <code>ROW_NUMBER()</code> with <code>PARTITION BY</code>.</li>
+                        <li><strong>Calculating running totals:</strong> Use <code>SUM() OVER()</code> with <code>ORDER BY</code>.</li>
+                        <li><strong>Comparing current vs previous values:</strong> Use <code>LAG()</code>.</li>
+                    </ul>
+                    <div class="callout exam-tip">
+                        <div class="callout-title">📝 Exam Tip</div>
+                        <p>Know the difference between ROW_NUMBER (always unique), RANK (gaps after ties), and DENSE_RANK (no gaps). This is a favorite exam question.</p>
+                    </div>
                 `
             }
         ],
@@ -392,6 +429,58 @@ LATERAL FLATTEN(input => t.src:items) f;</code></pre>
                 ],
                 correct: 0,
                 explanation: "PARSE_JSON takes a string containing valid JSON and converts it to a VARIANT value."
+            },
+            {
+                id: "d30q9",
+                type: "single",
+                question: "Which window function assigns a unique sequential integer to each row within a partition, without allowing ties?",
+                options: [
+                    "RANK()",
+                    "DENSE_RANK()",
+                    "ROW_NUMBER()",
+                    "NTILE()"
+                ],
+                correct: 2,
+                explanation: "ROW_NUMBER() always assigns a unique number to each row within a partition. Even if there is a tie in the ORDER BY values, the numbers will be sequential and unique."
+            },
+            {
+                id: "d30q10",
+                type: "single",
+                question: "In a window function, which function allows you to access a value from the previous row?",
+                options: [
+                    "LEAD()",
+                    "LAG()",
+                    "PREVIOUS()",
+                    "FIRST_VALUE()"
+                ],
+                correct: 1,
+                explanation: "LAG() accesses data from a previous row in the same result set without the use of a self-join."
+            },
+            {
+                id: "d30q11",
+                type: "single",
+                question: "If two rows have a tied value, which ranking function gives them the same rank and does NOT leave a gap in the next rank?",
+                options: [
+                    "ROW_NUMBER()",
+                    "RANK()",
+                    "DENSE_RANK()",
+                    "NTILE()"
+                ],
+                correct: 2,
+                explanation: "DENSE_RANK() assigns the same rank to ties but does not skip any ranks for the next row (e.g., 1, 2, 2, 3)."
+            },
+            {
+                id: "d30q12",
+                type: "single",
+                question: "What is the purpose of the 'ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW' frame clause?",
+                options: [
+                    "To calculate a moving average of the last 3 rows.",
+                    "To calculate a running total or cumulative aggregate.",
+                    "To partition the data into equal buckets.",
+                    "To find the maximum value in the entire partition."
+                ],
+                correct: 1,
+                explanation: "This frame clause defines a window that starts at the beginning of the partition and ends at the current row, which is standard for calculating running totals."
             }
         ]
     },
@@ -1014,7 +1103,8 @@ LATERAL FLATTEN(input => t.src:items) f;</code></pre>
             "Explain how Secure Data Sharing works without copying data",
             "Understand Reader Accounts",
             "Differentiate between Snowflake Marketplace and Data Exchange",
-            "Identify the use cases for Data Clean Rooms"
+            "Identify the use cases for Data Clean Rooms",
+            "Understand Native Apps Framework and Data Replication"
         ],
         sections: [
             {
@@ -1104,6 +1194,33 @@ LATERAL FLATTEN(input => t.src:items) f;</code></pre>
                             </defs>
                         </svg>
                         <p class="diagram-caption">Figure 5: Providers share data via a SHARE object. Normal consumers use their own compute. For Reader Accounts, the provider pays for the compute.</p>
+                    </div>
+                `
+            },
+            {
+                title: "Native Apps & Data Replication",
+                content: `
+                    <h4>Native Apps Framework</h4>
+                    <p>What it is: allows providers to build, package, and distribute full applications (not just data) through Snowflake.</p>
+                    <ul>
+                        <li><strong>Components:</strong> application package (code + data), application object (installed instance).</li>
+                        <li><strong>Inclusions:</strong> Providers can include stored procedures, UDFs, Streamlit UI, and shared data.</li>
+                        <li><strong>Execution:</strong> Consumers install the app in their own account &mdash; runs on the consumer's compute.</li>
+                        <li><strong>Distribution:</strong> via Snowflake Marketplace (public) or private listings.</li>
+                    </ul>
+                    <p><em>Analogy:</em> Data Sharing is like giving someone a spreadsheet. Native Apps is like giving them a full software application built on top of that spreadsheet.</p>
+                    
+                    <h4>Data Replication</h4>
+                    <p>Data Replication allows replicating databases across regions and cloud providers.</p>
+                    <ul>
+                        <li><strong>Database vs Account Replication:</strong> Database replication copies data; Account replication copies account-level objects (users, roles, warehouses).</li>
+                        <li><strong>Use Cases:</strong> Disaster recovery, business continuity, data locality.</li>
+                        <li><strong>Architecture:</strong> Primary vs secondary (replica) databases. Failover groups group objects for coordinated failover.</li>
+                        <li><strong>Requirement:</strong> Available in Business Critical+ edition for cross-region/cross-cloud.</li>
+                    </ul>
+                    <div class="callout exam-tip">
+                        <div class="callout-title">📝 Exam Tip</div>
+                        <p>Native Apps are a key COF-C03 topic. Understand that they can include both data AND code (procedures, UDFs, Streamlit), and they run on the consumer's compute.</p>
                     </div>
                 `
             }
@@ -1199,6 +1316,45 @@ LATERAL FLATTEN(input => t.src:items) f;</code></pre>
                 ],
                 correct: 1,
                 explanation: "Snowflake Marketplace is public and available to all customers. A Data Exchange is a private marketplace created by an organization to share data securely with a specific, invited group of partners."
+            },
+            {
+                id: "d34q8",
+                type: "single",
+                question: "What is a key difference between Secure Data Sharing and the Snowflake Native Apps Framework?",
+                options: [
+                    "Data Sharing uses provider compute, while Native Apps use consumer compute.",
+                    "Data Sharing is only for Marketplace, while Native Apps are private.",
+                    "Native Apps can include logic, code, and a UI, whereas Data Sharing only shares raw data.",
+                    "Native Apps cannot be monetized."
+                ],
+                correct: 2,
+                explanation: "While Data Sharing gives access to data, the Native Apps Framework allows providers to package data along with code (UDFs, Stored Procedures, Streamlit UI) into a full application."
+            },
+            {
+                id: "d34q9",
+                type: "single",
+                question: "Where do Snowflake Native Apps execute?",
+                options: [
+                    "On the provider's compute resources.",
+                    "On the consumer's compute resources.",
+                    "On Snowflake's internal serverless compute.",
+                    "On external cloud provider VMs."
+                ],
+                correct: 1,
+                explanation: "Consumers install the Native App in their own account, and the application runs using the consumer's virtual warehouses (compute)."
+            },
+            {
+                id: "d34q10",
+                type: "single",
+                question: "To replicate a database and enable failover across different cloud providers, which Snowflake edition is required?",
+                options: [
+                    "Standard Edition",
+                    "Enterprise Edition",
+                    "Business Critical Edition",
+                    "Virtual Private Snowflake (VPS) only"
+                ],
+                correct: 2,
+                explanation: "Cross-region and cross-cloud database replication and failover require the Business Critical Edition (or higher)."
             }
         ]
     },

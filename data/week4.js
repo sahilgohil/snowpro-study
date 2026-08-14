@@ -14,7 +14,8 @@ window.SNOWPRO.week4 = [
             "Understand the different types of Snowflake stages",
             "Differentiate between internal and external stages",
             "Learn how to use PUT and GET commands",
-            "Define and use File Formats"
+            "Define and use File Formats",
+            "Understand Git Integrations and API Integrations"
         ],
         sections: [
             {
@@ -128,6 +129,27 @@ PUT file://C:/data/mydata.csv @my_named_stage AUTO_COMPRESS=TRUE;</code></pre>
                     </svg>
                     <p class="diagram-caption">Figure 1: Loading flow using Internal and External Stages.</p>
                 </div>`
+            },
+            {
+                title: "Git Integration & API Integrations",
+                content: `<h4>Git Integration</h4>
+                <p>Snowflake can connect to Git repositories (GitHub, GitLab, Bitbucket, Azure DevOps). The primary purpose is to version-control Snowflake code (stored procedures, UDFs, Streamlit apps) and sync them with Git.</p>
+                <p>Key concepts:</p>
+                <ul>
+                    <li><code>CREATE API INTEGRATION</code> for Git: sets up the connection credentials.</li>
+                    <li><code>CREATE GIT REPOSITORY</code>: creates a Git repository stage in Snowflake. Files from Git appear as a special read-only stage that you can reference.</li>
+                    <li><code>ALTER GIT REPOSITORY ... FETCH</code>: pulls the latest changes from remote.</li>
+                </ul>
+                <p>Use cases include CI/CD pipelines, managing code across environments, and team collaboration on Snowflake code.</p>
+                <p><em>Analogy:</em> Git Integration turns your Snowflake account into a deployment target — you write code in your IDE, push to Git, and Snowflake can pull it in automatically.</p>
+                <h4>API Integrations</h4>
+                <p>API integrations are objects that allow Snowflake to securely call external APIs. A <code>CREATE API INTEGRATION</code> defines allowed endpoints and authentication methods.</p>
+                <p>They are used for external functions, external access integrations, and Snowpark external calls. For security, API integrations restrict which URLs Snowflake can call using an allowlist approach.</p>
+                <p>External Functions are UDFs that call external REST APIs (e.g., for geocoding, ML inference outside Snowflake).</p>
+                <div class="callout exam-tip">
+                    <div class="callout-title">📝 Exam Tip</div>
+                    <p>Git Integration is tested on COF-C03 — know that it uses an API INTEGRATION for credentials and creates a special read-only stage-like object. You don't need to memorize exact SQL syntax.</p>
+                </div>`
             }
         ],
         quiz: [
@@ -186,6 +208,30 @@ PUT file://C:/data/mydata.csv @my_named_stage AUTO_COMPRESS=TRUE;</code></pre>
                 options: ["Yes", "No, PUT only works with internal stages", "Yes, but only if the file is compressed", "No, PUT is only used for downloading data"],
                 correct: 1,
                 explanation: "The PUT command is strictly for uploading files from a local machine to a Snowflake Internal Stage. To upload to an external stage, you must use the cloud provider's native tools (e.g., AWS CLI)."
+            },
+            {
+                id: "d22q8",
+                type: "single",
+                question: "What is required to set up the connection credentials for a Git repository in Snowflake?",
+                options: ["A Storage Integration", "An API Integration", "A Notification Integration", "A Security Integration"],
+                correct: 1,
+                explanation: "An API INTEGRATION is used to securely store the connection credentials and authentication details for external Git providers like GitHub or GitLab."
+            },
+            {
+                id: "d22q9",
+                type: "single",
+                question: "How do files from a connected Git repository appear within Snowflake?",
+                options: ["As a specialized table", "As an External Function", "As a read-only stage-like object", "As a set of stored procedures"],
+                correct: 2,
+                explanation: "When you create a GIT REPOSITORY object in Snowflake, it acts as a special read-only stage, allowing you to reference the version-controlled files directly."
+            },
+            {
+                id: "d22q10",
+                type: "single",
+                question: "Which of the following is a primary use case for Snowflake API Integrations?",
+                options: ["Loading data from an internal stage", "Securely calling external REST APIs for External Functions", "Replicating databases across regions", "Authenticating users via SAML SSO"],
+                correct: 1,
+                explanation: "API Integrations provide a secure way to call external APIs (such as those used by External Functions), utilizing an allowlist approach to restrict which URLs can be accessed."
             }
         ]
     },

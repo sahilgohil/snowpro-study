@@ -385,3 +385,29 @@ hr{border:none;height:1px;background:var(--border);margin:2rem 0}
 .comparison-table td:first-child{font-weight:600}
 .comparison-table .check{color:var(--success);text-align:center;font-size:1.1rem}
 .comparison-table .cross{color:var(--error);text-align:center;font-size:1.1rem}
+
+/* ---- Practice Exam Card ---- */
+.practice-exam-section{margin-top:32px}
+.practice-exam-card{position:relative;border-radius:16px;padding:3px;background:linear-gradient(135deg,#ff6b6b,#ffa726,#29b5f6,#7c4dff);cursor:pointer;transition:transform .3s,box-shadow .3s;overflow:hidden}
+.practice-exam-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(255,107,107,.25)}
+.pe-card-glow{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,107,.15),rgba(124,77,255,.15));opacity:0;transition:opacity .3s}
+.practice-exam-card:hover .pe-card-glow{opacity:1}
+.pe-card-content{position:relative;background:var(--bg-secondary);border-radius:14px;padding:32px;text-align:center}
+.pe-badge{display:inline-block;background:linear-gradient(135deg,#ff6b6b,#ffa726);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.12em;padding:6px 16px;border-radius:20px;margin-bottom:16px}
+.pe-card-content h2{font-size:1.6rem;margin-bottom:8px;background:linear-gradient(135deg,#ff6b6b,#ffa726,#29b5f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pe-card-content p{color:var(--text-3);font-size:.85rem;margin-bottom:20px}
+.pe-stats{display:flex;justify-content:center;gap:24px;margin-bottom:20px}
+.pe-stat{color:var(--text-2);font-size:.85rem}
+.pe-stat strong{display:block;font-size:1.3rem;color:var(--text-1);margin-bottom:2px}
+.pe-result{margin-bottom:16px;font-size:.9rem;color:var(--text-2)}
+.pe-result strong{color:#ff6b6b}
+
+/* ---- Exam Timer Bar ---- */
+.exam-timer-bar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:12px;margin-bottom:16px}
+.timer-icon{font-size:1.3rem}
+.timer-display{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--accent-blue);letter-spacing:.05em;flex:1}
+.exam-timer-bar.warning .timer-display{color:#ff6b6b;animation:timerPulse 1s ease infinite}
+.exam-timer-bar.expired{border-color:#ff6b6b;background:rgba(255,107,107,.1)}
+.exam-timer-bar.expired .timer-display{color:#ff6b6b;font-size:1.3rem}
+@keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.btn-sm{font-size:.75rem;padding:6px 14px}
